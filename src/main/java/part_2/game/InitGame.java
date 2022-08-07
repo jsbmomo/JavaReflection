@@ -5,6 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * package-private 클래스를 검사하고 인스턴스화 하는 기능을 확인.
+ * 객체 지향 방식으로 틱택토 게임 구현.
+ */
 public class InitGame {
 
   public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
