@@ -68,9 +68,13 @@ public class JsonSerializerTest {
   // 많은 필드를 가진 대형 객체를 테스트하고 싶을 경우 (json 시각화) 들여쓰기
   private static String indent(int indentSize) {
     StringBuilder stringBuilder = new StringBuilder();
+
     for (int i = 0; i < indentSize; i++) {
       stringBuilder.append("\t");
     }
+
+    stringBuilder.append("\t".repeat(Math.max(0, indentSize)));
+
     return stringBuilder.toString();
   }
 
