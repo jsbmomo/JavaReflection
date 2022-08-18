@@ -1,5 +1,6 @@
 package part_3.jsonwriter;
 
+import part_3.data.Actor;
 import part_3.data.Address;
 import part_3.data.Person;
 
@@ -24,6 +25,13 @@ public class JsonSerializerTest {
 
     System.out.println(addressToJson);
     System.out.println(personToJson);
+
+    // 문자열 배열을 포함한 데이터 객체 포맷팅
+    Actor actor1 = new Actor("Elijah Wood", new String[]{"Lord of the Rings", "The Good Son"});
+
+    String actorToJson = objectToJson(actor1, 0);
+
+    System.out.println(actorToJson);
   }
 
   public static String objectToJson(Object instance, int indentSize) throws IllegalAccessException {
