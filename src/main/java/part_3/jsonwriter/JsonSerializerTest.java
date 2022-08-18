@@ -3,6 +3,7 @@ package part_3.jsonwriter;
 import part_3.data.Address;
 import part_3.data.Person;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
 /**
@@ -46,9 +47,11 @@ public class JsonSerializerTest {
       stringBuilder.append(":");
 
       if (field.getType().isPrimitive()) {
-        stringBuilder.append(formatPrimitiveValue(field, instance));
+        stringBuilder.append(formatPrimitiveValue(field.get(instance), field.getType()));
       } else if (field.getType().equals(String.class)) {
         stringBuilder.append(formatStringValue(field.get(instance).toString()));
+      } else if (field.getType().isArray()) {
+        stringBuilder.append(arrayToJson(field.get(instance)));
       } else { // 피드를 객체로 갖고 JSON 메서드에 같은 객체를 반복 호출하여 JSON 문자열 표현
         stringBuilder.append(objectToJson(field.get(instance), indentSize + 1));
       }
@@ -65,6 +68,34 @@ public class JsonSerializerTest {
     return stringBuilder.toString();
   }
 
+  private static String arrayToJson(Object arrayInstance) throws IllegalAccessException {
+    StringBuilder stringBuilder = new StringBuilder();
+
+    int arryLength = Array.getLength(arrayInstance);
+
+    // 모든 배열 정보를 가져온다.
+    Class<?> componentType = arrayInstance.getClass().getComponentType();
+
+    stringBuilder.append("[");
+
+    for (int i = 0; i < arryLength; i++) {
+      Object element = Array.get(arrayInstance, i);
+
+      if (componentType.isPrimitive()) {
+        stringBuilder.append(formatPrimitiveValue(element, componentType));
+      } else if (componentType.equals(String.class)) {
+        stringBuilder.append(formatStringValue(element.toString()));
+      }
+
+      if (i != arryLength - 1) {
+        stringBuilder.append(",");
+      }
+    }
+
+    stringBuilder.append("]");
+    return stringBuilder.toString();
+  }
+
   // 많은 필드를 가진 대형 객체를 테스트하고 싶을 경우 (json 시각화) 들여쓰기
   private static String indent(int indentSize) {
     StringBuilder stringBuilder = new StringBuilder();
@@ -78,17 +109,17 @@ public class JsonSerializerTest {
     return stringBuilder.toString();
   }
 
-  private static String formatPrimitiveValue(Field field, Object parentInstance) throws IllegalAccessException {
-    if (field.getType().equals(boolean.class)
-        || field.getType().equals(int.class)
-        || field.getType().equals(long.class)
-        || field.getType().equals(short.class)) {
-      return field.get(parentInstance).toString();
-    } else if (field.getType().equals(double.class) || field.getType().equals(float.class)) {
-      return String.format("%.02f", field.get(parentInstance));
+  private static String formatPrimitiveValue(Object instance, Class<?> type) throws IllegalAccessException {
+    if (type.equals(boolean.class)
+        || type.equals(int.class)
+        || type.equals(long.class)
+        || type.equals(short.class)) {
+      return instance.toString();
+    } else if (type.equals(double.class) || type.equals(float.class)) {
+      return String.format("%.02f", instance);
     }
 
-    throw new RuntimeException(String.format("Type : %s is unsupported", field.getType().getName()));
+    throw new RuntimeException(String.format("Type : %s is unsupported", type.getName()));
   }
 
   private static String formatStringValue(String value) {
