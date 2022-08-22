@@ -2,6 +2,7 @@ package part_3.jsonwriter;
 
 import part_3.data.Actor;
 import part_3.data.Address;
+import part_3.data.Movie;
 import part_3.data.Person;
 
 import java.lang.reflect.Array;
@@ -28,10 +29,20 @@ public class JsonSerializerTest {
 
     // 문자열 배열을 포함한 데이터 객체 포맷팅
     Actor actor1 = new Actor("Elijah Wood", new String[]{"Lord of the Rings", "The Good Son"});
+    Actor actor2 = new Actor("Ian MCKellen", new String[]{"X-Man", "Hobbit"});
+    Actor actor3 = new Actor("Orlando Bloom", new String[]{"Pirates of the Caribbean", "Kingdom of Heaven"});
+
+    Movie movie = new Movie(
+        "Lord of the Rings",
+        8.8f,
+        new String[] {"Action", "Adventure", "Drama"},
+        new Actor[] { actor1, actor2, actor3 });
 
     String actorToJson = objectToJson(actor1, 0);
+    String movieToJson = objectToJson(movie, 0);
 
     System.out.println(actorToJson);
+    System.out.println(movieToJson);
   }
 
   public static String objectToJson(Object instance, int indentSize) throws IllegalAccessException {
@@ -59,7 +70,7 @@ public class JsonSerializerTest {
       } else if (field.getType().equals(String.class)) {
         stringBuilder.append(formatStringValue(field.get(instance).toString()));
       } else if (field.getType().isArray()) {
-        stringBuilder.append(arrayToJson(field.get(instance)));
+        stringBuilder.append(arrayToJson(field.get(instance), indentSize + 1));
       } else { // 피드를 객체로 갖고 JSON 메서드에 같은 객체를 반복 호출하여 JSON 문자열 표현
         stringBuilder.append(objectToJson(field.get(instance), indentSize + 1));
       }
@@ -76,7 +87,8 @@ public class JsonSerializerTest {
     return stringBuilder.toString();
   }
 
-  private static String arrayToJson(Object arrayInstance) throws IllegalAccessException {
+  // JSON 배열 필드 출력
+  private static String arrayToJson(Object arrayInstance, int indentSize) throws IllegalAccessException {
     StringBuilder stringBuilder = new StringBuilder();
 
     int arryLength = Array.getLength(arrayInstance);
@@ -91,15 +103,21 @@ public class JsonSerializerTest {
 
       if (componentType.isPrimitive()) {
         stringBuilder.append(formatPrimitiveValue(element, componentType));
+        stringBuilder.append(formatPrimitiveValue(element, componentType));
       } else if (componentType.equals(String.class)) {
         stringBuilder.append(formatStringValue(element.toString()));
+        stringBuilder.append(formatStringValue(element.toString()));
+      } else { // componentType이 원시형이나 문자열이 아닐 경우 일반적인 객체로 판단
+        stringBuilder.append(objectToJson(element, indentSize + 1));
       }
 
       if (i != arryLength - 1) {
         stringBuilder.append(",");
       }
+      stringBuilder.append("\n");
     }
 
+    stringBuilder.append(indent(indentSize));
     stringBuilder.append("]");
     return stringBuilder.toString();
   }
@@ -108,9 +126,9 @@ public class JsonSerializerTest {
   private static String indent(int indentSize) {
     StringBuilder stringBuilder = new StringBuilder();
 
-    for (int i = 0; i < indentSize; i++) {
-      stringBuilder.append("\t");
-    }
+//    for (int i = 0; i < indentSize; i++) {
+//      stringBuilder.append("\t");
+//    }
 
     stringBuilder.append("\t".repeat(Math.max(0, indentSize)));
 
